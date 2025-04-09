@@ -1,5 +1,7 @@
 # PRaCfID
-Pattern Recognition and Cleaning for Image Datasets
+## Pattern Recognition and Cleaning for Image Datasets
+
+---
 
 ## For Deploying Locally (Development and Testing)
 
