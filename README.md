@@ -15,8 +15,21 @@
      ```shell
      source venv/bin/activate
      ```
-3. Once the virtual environment is activated, install Flask
+3. Once the virtual environment is activated, install necessary libraries
    ```shell
    pip install Flask
+   ```
+4. Start the backend
+   ```shell
+   python app.py
+   ```
+6. In a separate terminal, navigate to the `app/client/` directory
+7. Install necessary packages with
+   ```shell
+   npm install
+   ```
+8. Run the React App
+   ```shell
+   npm start
    ```
      
