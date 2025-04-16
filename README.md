@@ -17,7 +17,12 @@
      ```
 3. Once the virtual environment is activated, install necessary libraries
    ```shell
-   pip install Flask
+   pip install flask
+   pip install werkzeug
+   pip install opencv-python
+   pip install numpy
+   pip install pillow
+   pip install flask-cors
    ```
 4. Start the backend
    ```shell
