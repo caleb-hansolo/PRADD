@@ -14,7 +14,7 @@ const AdvancedSettingsPage = ({ sessionId }) => {
   const [patternThreshold, setPatternThreshold] = useState(200);
   const [solidThreshold, setSolidThreshold] = useState(0.60);
   const [objectPrompt, setObjectPrompt] = useState(
-    "Analyze the image and determine with at least 70% confidence whether it contains man-made objects (buildings, houses, light poles, cars, sheds, or artificial structures) that affect depth; exclude natural elements like trees or paths in mostly tree-covered images, and explicitly state 'True' or 'False' before listing identified objects or explaining uncertainty."
+    "Analyze the image and determine with at least 70% confidence whether it contains natural elements like trees or mostly tree-covered images, and explicitly state 'True' or 'False' before listing identified objects or explaining uncertainty."
   );
 
   // Fetch session data when component mounts or sessionId changes
