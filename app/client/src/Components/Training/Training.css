@@ -1,0 +1,27 @@
+.training-container {
+    height: 93.5vh;
+    overflow: hidden;
+  }
+  
+  .menu-col {
+    background-color: #f1f3f5;
+    padding: 0;
+  }
+  
+  .content-col {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .upload-col {
+    padding: 0.5rem;
+    height: 100%;
+  }
+  
+  .divider {
+    margin: 0.5rem 0;
+    border-top: 1px solid #ccc;
+  }
+  

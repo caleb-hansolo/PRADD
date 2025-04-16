@@ -1,0 +1,61 @@
+.advanced-settings-container {
+    height: calc(100vh - 120px);
+    padding: 15px;
+  }
+  
+  .menu-col {
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    padding: 20px 10px;
+    height: 100%;
+    overflow-y: auto;
+  }
+  
+  .settings-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .slider-container {
+    padding: 10px 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .input-container {
+    padding: 10px 5px;
+  }
+  
+  .content-col {
+    height: 100%;
+    padding: 15px;
+    overflow-y: auto;
+  }
+  
+  .upload-col {
+    padding: 10px;
+    height: 100%;
+  }
+  
+  .divider {
+    margin: 15px 0;
+  }
+  
+  /* Colors for different types */
+  .dataset-color {
+    background-color: rgba(69, 130, 236, 0.1);
+    border: 2px solid #4582ec;
+  }
+  
+  .mirror-color {
+    background-color: rgba(23, 162, 184, 0.1);
+    border: 2px solid #17a2b8;
+  }
+  
+  .pattern-color {
+    background-color: rgba(2, 184, 117, 0.1);
+    border: 2px solid #02b875;
+  }
+  

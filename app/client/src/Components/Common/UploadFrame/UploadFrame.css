@@ -1,0 +1,43 @@
+.upload-frame {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 10px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .thumbnail-container {
+    position: relative;
+    height: 60%;
+    background-color: #e9ecef;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .thumbnail-image {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  
+  .no-thumbnail {
+    color: #6c757d;
+    text-align: center;
+  }
+  
+  .upload-btn,
+  .delete-btn {
+    margin-top: 0.5rem;
+  }
+  
+  .delete-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+  }
+  
