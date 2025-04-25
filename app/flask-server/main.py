@@ -174,26 +174,157 @@ def extract_first_frame(video_path, job_id, file_type):
         logger.error(f"Failed to extract frame: {e}")
         return None
 
+# @app.post("/api/update-threshold")
+# async def update_threshold(threshold_data: dict):
+#     """Update threshold parameters"""
+#     session_id = threshold_data.get('session_id')
+    
+#     if not session_id or session_id not in sessions:
+#         return JSONResponse(status_code=400, content={"error": "Invalid session ID"})
+    
+#     param_name = threshold_data.get('param_name')
+#     value = threshold_data.get('value')
+    
+#     if param_name and param_name in sessions[session_id]['thres_params']:
+#         sessions[session_id]['thres_params'][param_name] = value
+        
+#         # Apply threshold to preview image if it exists
+#         apply_threshold_to_preview(session_id, param_name, value)
+        
+#         return {"success": True}
+    
+#     return JSONResponse(status_code=400, content={"error": "Invalid parameter name"})
 @app.post("/api/update-threshold")
 async def update_threshold(threshold_data: dict):
     """Update threshold parameters"""
     session_id = threshold_data.get('session_id')
-    
-    if not session_id or session_id not in sessions:
-        return JSONResponse(status_code=400, content={"error": "Invalid session ID"})
-    
-    param_name = threshold_data.get('param_name')
+    threshold_type = threshold_data.get('threshold_type')
     value = threshold_data.get('value')
     
-    if param_name and param_name in sessions[session_id]['thres_params']:
-        sessions[session_id]['thres_params'][param_name] = value
-        
-        # Apply threshold to preview image if it exists
-        apply_threshold_to_preview(session_id, param_name, value)
-        
-        return {"success": True}
+    if not session_id or session_id not in sessions:
+        return JSONResponse(status_code=400, content={"success": False, "message": "Invalid session ID"})
     
+    # Update the threshold value
+    if threshold_type == 'pattern_threshold':
+        sessions[session_id]['thres_params']['Pattern Thresholding'] = value
+    elif threshold_type == 'solid_threshold':
+        sessions[session_id]['thres_params']['Solid Color Detection'] = value
+    elif threshold_type == 'object_prompt':
+        sessions[session_id]['thres_params']['Object Detection Prompt'] = value
+    else:
+        return JSONResponse(status_code=400, content={"success": False, "message": "Invalid threshold type"})
+    
+    # Apply threshold to preview images if they exist
+    path_key = None
+    if threshold_type == 'pattern_threshold':
+        path_key = 'pattern_path'
+    elif threshold_type == 'solid_threshold':
+        path_key = 'dataset_path'
+    
+    if path_key and sessions[session_id].get(path_key):
+        # Here you would apply the appropriate threshold to the image
+        # and save a new preview thumbnail
+        # For now we'll just return success
+        apply_threshold_to_preview(session_id, threshold_type, value)
+        return {"success": True}
+
     return JSONResponse(status_code=400, content={"error": "Invalid parameter name"})
+    
+    
+
+def apply_threshold_to_preview(session_id, threshold_type, value):
+    """Apply threshold to generate a preview image"""
+    if session_id not in sessions:
+        logger.error(f"Invalid session ID: {session_id}")
+        return False
+    
+    session = sessions[session_id]
+    
+    if threshold_type == 'pattern_threshold':
+        # Apply pattern threshold to pattern image
+        if not session.get('pattern_path'):
+            logger.warning("No pattern image to apply threshold to")
+            return False
+        
+        try:
+            # Extract a frame from the video
+            video_path = session['pattern_path']
+            cap = cv2.VideoCapture(video_path)
+            success, frame = cap.read()
+            cap.release()
+            
+            if not success:
+                logger.error(f"Failed to read frame from {video_path}")
+                return False
+            
+            # Apply pattern threshold
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            _, thresh = cv2.threshold(gray, value, 255, cv2.THRESH_BINARY)
+            
+            # Convert back to RGB for thumbnail
+            color_thresh = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
+            
+            # Save as thumbnail
+            thumbnail_filename = f"{session_id}_pattern_thumbnail.png"
+            thumbnail_path = UPLOAD_DIR / thumbnail_filename
+            cv2.imwrite(str(thumbnail_path), color_thresh)
+            
+            logger.info(f"Generated preview thumbnail for pattern threshold: {value}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error applying pattern threshold: {e}")
+            return False
+            
+    elif threshold_type == 'solid_threshold':
+        # Apply solid threshold to dataset image
+        if not session.get('dataset_path'):
+            logger.warning("No dataset image to apply threshold to")
+            return False
+        
+        try:
+            # Extract a frame from the video
+            video_path = session['dataset_path']
+            cap = cv2.VideoCapture(video_path)
+            success, frame = cap.read()
+            cap.release()
+            
+            if not success:
+                logger.error(f"Failed to read frame from {video_path}")
+                return False
+            
+            # Apply solid color detection
+            # (This is a simplified example - real implementation would be more complex)
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            h, s, v = cv2.split(hsv)
+            
+            # Create a binary mask where pixels with saturation below the threshold are white
+            # and others are black (representing potential solid color areas)
+            _, mask = cv2.threshold(s, int(value * 255), 255, cv2.THRESH_BINARY_INV)
+            
+            # Apply mask to the original frame
+            result = cv2.bitwise_and(frame, frame, mask=mask)
+            
+            # Save as thumbnail
+            thumbnail_filename = f"{session_id}_dataset_thumbnail.png"
+            thumbnail_path = UPLOAD_DIR / thumbnail_filename
+            cv2.imwrite(str(thumbnail_path), result)
+            
+            logger.info(f"Generated preview thumbnail for solid threshold: {value}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error applying solid threshold: {e}")
+            return False
+            
+    elif threshold_type == 'object_prompt':
+        # For object detection prompt, we would typically call a model
+        # Here we just log the change since this would require AI integration
+        logger.info(f"Object detection prompt updated: {value}")
+        return True
+    
+    return False
+
 
 def apply_threshold_to_preview(session_id, param_name, value):
     """Apply threshold to generate a preview image"""
@@ -335,13 +466,14 @@ async def get_metrics(session_id: str):
         "metrics": metrics
     }
 
+
 @app.post("/api/restore-defaults")
 async def restore_defaults(data: dict):
     """Restore default threshold values"""
     session_id = data.get('session_id')
     
     if not session_id or session_id not in sessions:
-        return JSONResponse(status_code=400, content={"error": "Invalid session ID"})
+        return JSONResponse(status_code=400, content={"success": False, "message": "Invalid session ID"})
     
     # Reset to default values
     sessions[session_id]['thres_params'] = {
@@ -349,6 +481,9 @@ async def restore_defaults(data: dict):
         'Solid Color Detection': DEFAULT_SOLID_THRES,
         'Object Detection Prompt': DEFAULT_OBJ_PROMPT
     }
+    
+    # Regenerate preview images with default settings
+    # This would apply the default thresholds to the images
     
     return {"success": True}
 
