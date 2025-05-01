@@ -21,9 +21,6 @@ const TrainingPage = ({ sessionId }) => {
     }
   };
 
-  // debugging
-  console.log("training: dataset: ", thumbnails.dataset);
-
   return (
     <Container fluid className="training-container">
       <Row className="h-100">

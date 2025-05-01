@@ -16,7 +16,6 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from pipeline import videos_to_frames, create_zip_from_directory
 
-
 # load environment variables
 load_dotenv()
 
@@ -26,13 +25,14 @@ logger = logging.getLogger(__name__)
 
 # Configure directories
 UPLOAD_DIR = Path("uploads")
+DOWNLOAD_DIR = Path("downloads")
 FRAMES_DIR = Path("frames")
 MIRROR_DIR = Path("mirror")
 PATTERN_DIR = Path("pattern")
 CHUNK_DIR = Path("uploaded_chunks")
 
 # Ensure directories exist
-for folder in [UPLOAD_DIR, FRAMES_DIR, MIRROR_DIR, PATTERN_DIR, CHUNK_DIR]:
+for folder in [UPLOAD_DIR, DOWNLOAD_DIR, FRAMES_DIR, MIRROR_DIR, PATTERN_DIR, CHUNK_DIR]:
     folder.mkdir(exist_ok=True)
 
 # Default threshold parameters
