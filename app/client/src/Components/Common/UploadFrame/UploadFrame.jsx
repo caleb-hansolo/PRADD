@@ -6,47 +6,12 @@ const UploadFrame = ({ title, colorClass, thumbnail, onUpload, onDelete, session
   const fileInputRef = useRef(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
-  // const [previewThumbnail, setPreviewThumbnail] = useState(thumbnail);
-  console.log(title, " upload thumbnail: ", thumbnail);
-
-  // Update previewThumbnail when thumbnail prop changes
-  // useEffect(() => {
-  //   setPreviewThumbnail(thumbnail);
-  // }, [thumbnail]);
-
-  // In a real implementation, we'd fetch a preview with applied thresholds
-  // For preview mode, we would update this thumbnail when thresholds change
-  // useEffect(() => {
-  //   if (isPreview && sessionId && thumbnail) {
-  //     // Every few seconds, check if we need to update the preview
-  //     const intervalId = setInterval(() => {
-  //       checkForUpdatedPreview();
-  //     }, 3000);
-      
-  //     return () => clearInterval(intervalId);
-  //   }
-  // }, [isPreview, sessionId, thumbnail]);
 
   const checkForUpdatedPreview = async () => {
     try {
       // In a real implementation, this would fetch the latest processed thumbnail
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/session/${sessionId}`);
-      const data = await response.json();
-      console.log(" upload data: ", data);
-      
-      
-      // if (data.thumbnails) {
-      //   if (fileType === 'dataset' && data.thumbnails.dataset) {
-      //     setPreviewThumbnail(data.thumbnails.dataset);
-      //   } else if (fileType === 'mirror' && data.thumbnails.mirror) {
-      //     setPreviewThumbnail(data.thumbnails.mirror);
-      //   } else if (fileType === 'pattern' && data.thumbnails.pattern) {
-      //     setPreviewThumbnail(data.thumbnails.pattern);
-      //   }
-      //   console.log("  ***** thumbnails: ", data.thumbnails);
-      // }
-
-      
+      const data = await response.json();      
     } catch (error) {
       console.error('Error checking for preview updates:', error);
     }
@@ -103,7 +68,6 @@ const UploadFrame = ({ title, colorClass, thumbnail, onUpload, onDelete, session
             filename: data.filename,
             thumbnail: data.thumbnail_url
           });
-          // setPreviewThumbnail(data.thumbnail_url);
         }
       }
     } catch (error) {
@@ -117,13 +81,10 @@ const UploadFrame = ({ title, colorClass, thumbnail, onUpload, onDelete, session
   const handleDelete = () => {
     if (window.confirm(`Are you sure you want to delete this ${title}?`)) {
       onDelete();
-      // setPreviewThumbnail(null);
     }
   };
 
   
-  // console.log("     preview thumbnail: ", previewThumbnail);
-
   return (
     <div className="upload-frame">
       <h5>{title}</h5>

@@ -391,40 +391,6 @@ async def run_pipeline(pipeline_data: dict):
         "results": results
     }
 
-# @app.post("/api/delete/{file_type}")
-# async def delete_file(file_type: str, delete_data: dict):
-#     """Delete uploaded file"""
-#     session_id = delete_data.get('session_id')
-    
-#     if not session_id or session_id not in sessions:
-#         return JSONResponse(status_code=400, content={"error": "Invalid session ID"})
-    
-#     if file_type == 'dataset':
-#         file_path = sessions[session_id]['dataset_path']
-#         thumbnail_path = UPLOAD_DIR / f"{session_id}_dataset_thumbnail.png"
-#         if file_path and os.path.exists(file_path):
-#             os.remove(file_path)
-#         if thumbnail_path.exists():
-#             os.remove(thumbnail_path)
-#         sessions[session_id]['dataset_path'] = None
-#     elif file_type == 'mirror':
-#         file_path = sessions[session_id]['mirror_path']
-#         thumbnail_path = UPLOAD_DIR / f"{session_id}_mirror_thumbnail.png"
-#         if file_path and os.path.exists(file_path):
-#             os.remove(file_path)
-#         if thumbnail_path.exists():
-#             os.remove(thumbnail_path)
-#         sessions[session_id]['mirror_path'] = None
-#     elif file_type == 'pattern':
-#         file_path = sessions[session_id]['pattern_path']
-#         thumbnail_path = UPLOAD_DIR / f"{session_id}_pattern_thumbnail.png"
-#         if file_path and os.path.exists(file_path):
-#             os.remove(file_path)
-#         if thumbnail_path.exists():
-#             os.remove(thumbnail_path)
-#         sessions[session_id]['pattern_path'] = None
-    
-#     return {"success": True}
 
 @app.post("/api/delete/{file_type}")
 async def delete_file(file_type: str, delete_data: dict):
@@ -435,6 +401,7 @@ async def delete_file(file_type: str, delete_data: dict):
         return JSONResponse(status_code=400, content={"error": "Invalid session ID"})
 
     session = sessions[session_id]
+    thumbnails = session.get("thumbnails")
 
     # Define mapping of file types to paths and thumbnails
     file_key_map = {
@@ -448,7 +415,6 @@ async def delete_file(file_type: str, delete_data: dict):
 
     path_key = file_key_map[file_type]
     file_path = session.get(path_key)
-    thumbnail_path = UPLOAD_DIR / f"{session_id}_{file_type}_thumbnail.png"
 
     # Delete actual file if it exists
     if file_path and os.path.exists(file_path):
@@ -456,9 +422,15 @@ async def delete_file(file_type: str, delete_data: dict):
         session[path_key] = None
 
     # Delete thumbnail file if it exists
-    if thumbnail_path.exists():
-        os.remove(thumbnail_path)
-        session["thumbnails"][file_type] = None
+    thumbnail_url = thumbnails.get(file_type)
+    if thumbnail_url:
+        # Get only the filename part from the URL path
+        thumbnail_filename = Path(thumbnail_url).name
+        thumbnail_file_path = UPLOAD_DIR / thumbnail_filename
+
+        if thumbnail_file_path.exists():
+            os.remove(thumbnail_file_path)
+            session["thumbnails"][file_type] = None
 
     return {"success": True}
 
