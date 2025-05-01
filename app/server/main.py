@@ -77,7 +77,12 @@ async def create_session():
             'Pattern Thresholding': True,
             'Model Object Detection': True,
             'Solid Color Detection': True
-        }
+        },
+        'thumbnails': {
+            'dataset': None,
+            'mirror': None,
+            'pattern': None
+        },
     }
     return {"session_id": session_id}
 
@@ -143,11 +148,17 @@ async def upload_chunk(request: Request):
                     sessions[session_id]["mirror_path"] = str(output_path)
                 elif file_type == "pattern":
                     sessions[session_id]["pattern_path"] = str(output_path)
+
+                # Update thumbnail in session
+                if thumbnail_url:
+                    sessions[session_id]["thumbnails"][file_type] = thumbnail_url
+
             
             return {
                 "status": "complete", 
                 "filename": f"{job_id}_{filename}",
-                "thumbnail_url": thumbnail_url
+                "thumbnail_url": thumbnail_url,
+                "thumbnails": sessions[session_id]["thumbnails"],
             }
         else:
             return {"status": "partial", "chunk_index": index}
@@ -183,26 +194,7 @@ def extract_first_frame(video_path, job_id, file_type):
         logger.error(f"Failed to extract frame: {e}")
         return None
 
-# @app.post("/api/update-threshold")
-# async def update_threshold(threshold_data: dict):
-#     """Update threshold parameters"""
-#     session_id = threshold_data.get('session_id')
-    
-#     if not session_id or session_id not in sessions:
-#         return JSONResponse(status_code=400, content={"error": "Invalid session ID"})
-    
-#     param_name = threshold_data.get('param_name')
-#     value = threshold_data.get('value')
-    
-#     if param_name and param_name in sessions[session_id]['thres_params']:
-#         sessions[session_id]['thres_params'][param_name] = value
-        
-#         # Apply threshold to preview image if it exists
-#         apply_threshold_to_preview(session_id, param_name, value)
-        
-#         return {"success": True}
-    
-#     return JSONResponse(status_code=400, content={"error": "Invalid parameter name"})
+
 @app.post("/api/update-threshold")
 async def update_threshold(threshold_data: dict):
     """Update threshold parameters"""
@@ -337,12 +329,12 @@ def apply_threshold_to_preview(session_id, threshold_type, value):
     return False
 
 
-def apply_threshold_to_preview(session_id, param_name, value):
-    """Apply threshold to generate a preview image"""
-    # This would contain logic to apply the threshold to the image
-    # For now, we'll just log it
-    logger.info(f"Applying {param_name}={value} to preview for session {session_id}")
-    # Actual implementation would process the image and save a new preview
+# def apply_threshold_to_preview(session_id, param_name, value):
+#     """Apply threshold to generate a preview image"""
+#     # This would contain logic to apply the threshold to the image
+#     # For now, we'll just log it
+#     logger.info(f"Applying {param_name}={value} to preview for session {session_id}")
+#     # Actual implementation would process the image and save a new preview
 
 @app.post("/api/update-pipeline")
 async def update_pipeline(pipeline_data: dict):
@@ -399,40 +391,77 @@ async def run_pipeline(pipeline_data: dict):
         "results": results
     }
 
+# @app.post("/api/delete/{file_type}")
+# async def delete_file(file_type: str, delete_data: dict):
+#     """Delete uploaded file"""
+#     session_id = delete_data.get('session_id')
+    
+#     if not session_id or session_id not in sessions:
+#         return JSONResponse(status_code=400, content={"error": "Invalid session ID"})
+    
+#     if file_type == 'dataset':
+#         file_path = sessions[session_id]['dataset_path']
+#         thumbnail_path = UPLOAD_DIR / f"{session_id}_dataset_thumbnail.png"
+#         if file_path and os.path.exists(file_path):
+#             os.remove(file_path)
+#         if thumbnail_path.exists():
+#             os.remove(thumbnail_path)
+#         sessions[session_id]['dataset_path'] = None
+#     elif file_type == 'mirror':
+#         file_path = sessions[session_id]['mirror_path']
+#         thumbnail_path = UPLOAD_DIR / f"{session_id}_mirror_thumbnail.png"
+#         if file_path and os.path.exists(file_path):
+#             os.remove(file_path)
+#         if thumbnail_path.exists():
+#             os.remove(thumbnail_path)
+#         sessions[session_id]['mirror_path'] = None
+#     elif file_type == 'pattern':
+#         file_path = sessions[session_id]['pattern_path']
+#         thumbnail_path = UPLOAD_DIR / f"{session_id}_pattern_thumbnail.png"
+#         if file_path and os.path.exists(file_path):
+#             os.remove(file_path)
+#         if thumbnail_path.exists():
+#             os.remove(thumbnail_path)
+#         sessions[session_id]['pattern_path'] = None
+    
+#     return {"success": True}
+
 @app.post("/api/delete/{file_type}")
 async def delete_file(file_type: str, delete_data: dict):
-    """Delete uploaded file"""
+    """Delete uploaded file and clear thumbnail"""
     session_id = delete_data.get('session_id')
-    
+
     if not session_id or session_id not in sessions:
         return JSONResponse(status_code=400, content={"error": "Invalid session ID"})
-    
-    if file_type == 'dataset':
-        file_path = sessions[session_id]['dataset_path']
-        thumbnail_path = UPLOAD_DIR / f"{session_id}_dataset_thumbnail.png"
-        if file_path and os.path.exists(file_path):
-            os.remove(file_path)
-        if thumbnail_path.exists():
-            os.remove(thumbnail_path)
-        sessions[session_id]['dataset_path'] = None
-    elif file_type == 'mirror':
-        file_path = sessions[session_id]['mirror_path']
-        thumbnail_path = UPLOAD_DIR / f"{session_id}_mirror_thumbnail.png"
-        if file_path and os.path.exists(file_path):
-            os.remove(file_path)
-        if thumbnail_path.exists():
-            os.remove(thumbnail_path)
-        sessions[session_id]['mirror_path'] = None
-    elif file_type == 'pattern':
-        file_path = sessions[session_id]['pattern_path']
-        thumbnail_path = UPLOAD_DIR / f"{session_id}_pattern_thumbnail.png"
-        if file_path and os.path.exists(file_path):
-            os.remove(file_path)
-        if thumbnail_path.exists():
-            os.remove(thumbnail_path)
-        sessions[session_id]['pattern_path'] = None
-    
+
+    session = sessions[session_id]
+
+    # Define mapping of file types to paths and thumbnails
+    file_key_map = {
+        'dataset': 'dataset_path',
+        'mirror': 'mirror_path',
+        'pattern': 'pattern_path'
+    }
+
+    if file_type not in file_key_map:
+        return JSONResponse(status_code=400, content={"error": "Invalid file type"})
+
+    path_key = file_key_map[file_type]
+    file_path = session.get(path_key)
+    thumbnail_path = UPLOAD_DIR / f"{session_id}_{file_type}_thumbnail.png"
+
+    # Delete actual file if it exists
+    if file_path and os.path.exists(file_path):
+        os.remove(file_path)
+        session[path_key] = None
+
+    # Delete thumbnail file if it exists
+    if thumbnail_path.exists():
+        os.remove(thumbnail_path)
+        session["thumbnails"][file_type] = None
+
     return {"success": True}
+
 
 @app.get("/api/session/{session_id}")
 async def get_session(session_id: str):

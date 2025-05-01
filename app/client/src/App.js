@@ -40,10 +40,10 @@ function App() {
         
         <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
           <Tab eventKey="training" title="Training and Testing">
-            <TrainingPage sessionId={sessionId} />
+            <TrainingPage sessionId={sessionId} forceRefresh={activeTab === 'training'} />
           </Tab>
           <Tab eventKey="advanced" title="Advanced Settings">
-            <AdvancedSettingsPage sessionId={sessionId} />
+            <AdvancedSettingsPage sessionId={sessionId} forceRefresh={activeTab === 'advanced'} />
           </Tab>
           <Tab eventKey="metrics" title="Metrics">
             <MetricsPage sessionId={sessionId} />
