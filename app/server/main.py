@@ -13,6 +13,10 @@ import logging
 import json
 from typing import Dict, Optional, List
 from pydantic import BaseModel
+from dotenv import load_dotenv
+
+# load environment variables
+load_dotenv()
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -39,10 +43,15 @@ sessions: Dict[str, dict] = {}
 
 app = FastAPI()
 
+#
+origins = [
+
+]
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=[os.getenv("FRONTEND_ORIGIN")],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -215,16 +224,18 @@ async def update_threshold(threshold_data: dict):
         return JSONResponse(status_code=400, content={"success": False, "message": "Invalid threshold type"})
     
     # Apply threshold to preview images if they exist
+    # TODO: Need to update this globally so the right variables get passed to the pipeline
+    #   - will need to check if the corresponding checkbox is checked in the training and testing page
     path_key = None
     if threshold_type == 'pattern_threshold':
         path_key = 'pattern_path'
     elif threshold_type == 'solid_threshold':
         path_key = 'dataset_path'
+    elif threshold_type == 'object_prompt':
+        path_key = 'dataset_path'
     
     if path_key and sessions[session_id].get(path_key):
-        # Here you would apply the appropriate threshold to the image
-        # and save a new preview thumbnail
-        # For now we'll just return success
+        # apply appropriate threshold to the image
         apply_threshold_to_preview(session_id, threshold_type, value)
         return {"success": True}
 
@@ -489,4 +500,8 @@ async def restore_defaults(data: dict):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5000)
+    uvicorn.run(
+        app, 
+        host=os.getenv("BACKEND_HOST", "127.0.0.1"), 
+        port=int(os.getenv("BACKEND_PORT", 5000))
+    )

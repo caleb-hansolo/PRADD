@@ -1,6 +1,8 @@
 fastapi
 uvicorn
+pydantic
 python-multipart
 pillow
 opencv-python
 numpy
+python-dotenv

@@ -16,7 +16,7 @@ function App() {
   useEffect(() => {
     const initSession = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/new-session');
+        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/new-session`);
         const data = await response.json();
         setSessionId(data.session_id);
         setIsLoading(false);

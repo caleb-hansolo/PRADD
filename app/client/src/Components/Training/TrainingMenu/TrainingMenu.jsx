@@ -44,7 +44,7 @@ const TrainingMenu = ({ sessionId, sessionData, onRefreshData }) => {
     setIsRunning(true);
     
     try {
-      const response = await fetch('http://localhost:5000/api/run-pipeline', {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/run-pipeline`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

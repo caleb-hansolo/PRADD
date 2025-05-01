@@ -3,3 +3,5 @@ mirror/
 pattern/
 uploads/
 uploaded_chunks/
+venv/
+.env
