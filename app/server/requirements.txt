@@ -6,3 +6,4 @@ pillow
 opencv-python
 numpy
 python-dotenv
+ollama

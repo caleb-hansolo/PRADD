@@ -14,6 +14,8 @@ import json
 from typing import Dict, Optional, List
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from pipeline import videos_to_frames, create_zip_from_directory
+
 
 # load environment variables
 load_dotenv()
@@ -57,7 +59,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files directory for serving uploads
+# Mount static files directory for serving uploads and downloads
+app.mount("/downloads", StaticFiles(directory="downloads"), name="downloads")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.get("/api/new-session")
@@ -355,41 +358,74 @@ async def update_pipeline(pipeline_data: dict):
     
     return JSONResponse(status_code=400, content={"error": "Invalid processes data"})
 
+# @app.post("/api/run-pipeline")
+# async def run_pipeline(pipeline_data: dict):
+#     """Run the selected pipeline processes"""
+#     session_id = pipeline_data.get('session_id')
+    
+#     if not session_id or session_id not in sessions:
+#         return JSONResponse(status_code=400, content={"error": "Invalid session ID"})
+    
+#     session = sessions[session_id]
+    
+#     # Check if required files are uploaded
+#     if not session['dataset_path']:
+#         return JSONResponse(status_code=400, content={"error": "Dataset not uploaded"})
+    
+#     # Run the selected processes
+#     results = {}
+#     processes = pipeline_data.get('processes', {})
+    
+#     # Example pipeline execution
+#     if processes.get('Pattern Thresholding', False):
+#         # Process pattern thresholding logic would go here
+#         results['pattern_thresholding'] = 'Pattern thresholding completed'
+    
+#     if processes.get('Model Object Detection', False):
+#         # Process object detection logic would go here
+#         results['object_detection'] = 'Object detection completed'
+    
+#     if processes.get('Solid Color Detection', False):
+#         # Process solid color detection logic would go here
+#         results['solid_color_detection'] = 'Solid color detection completed'
+    
+#     return {
+#         "success": True,
+#         "results": results
+#     }
+
 @app.post("/api/run-pipeline")
 async def run_pipeline(pipeline_data: dict):
-    """Run the selected pipeline processes"""
+    """Run the full pipeline process and return ZIP file path"""
     session_id = pipeline_data.get('session_id')
-    
+
     if not session_id or session_id not in sessions:
         return JSONResponse(status_code=400, content={"error": "Invalid session ID"})
-    
+
     session = sessions[session_id]
-    
-    # Check if required files are uploaded
-    if not session['dataset_path']:
-        return JSONResponse(status_code=400, content={"error": "Dataset not uploaded"})
-    
-    # Run the selected processes
-    results = {}
-    processes = pipeline_data.get('processes', {})
-    
-    # Example pipeline execution
-    if processes.get('Pattern Thresholding', False):
-        # Process pattern thresholding logic would go here
-        results['pattern_thresholding'] = 'Pattern thresholding completed'
-    
-    if processes.get('Model Object Detection', False):
-        # Process object detection logic would go here
-        results['object_detection'] = 'Object detection completed'
-    
-    if processes.get('Solid Color Detection', False):
-        # Process solid color detection logic would go here
-        results['solid_color_detection'] = 'Solid color detection completed'
-    
-    return {
-        "success": True,
-        "results": results
-    }
+
+    # currently using dataset path for raw and mirror for realsense
+    raw_path = session.get("dataset_path")
+    realsense_path = session.get("mirror_path")
+
+    # need a way to get pattern images extracted and into pipeline?
+    # maybe make pattern able to handle folder of images and also video? not sure
+
+    if not raw_path or not realsense_path:
+        return JSONResponse(status_code=400, content={"error": "Missing input videos"})
+
+    try:
+        frame_count = videos_to_frames(raw_path, realsense_path)
+        zip_path = create_zip_from_directory("Accepted_images")
+        return {
+            "success": True,
+            "message": f"Processed {frame_count} frames",
+            "download_url": f"/downloads/{Path(zip_path).name}"
+        }
+    except Exception as e:
+        logger.error(f"Pipeline execution failed: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
 
 
 @app.post("/api/delete/{file_type}")
