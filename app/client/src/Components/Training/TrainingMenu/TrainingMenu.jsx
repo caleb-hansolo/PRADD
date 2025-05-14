@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap'; // Added Alert
+import { Form, Button } from 'react-bootstrap'; // Added Alert
 import ExpandableOptionFrame from '../../Common/ExpandableOptionFrame/ExpandableOptionFrame';
 // import './TrainingMenu.css'; // this dont exist yet
 
@@ -22,10 +22,6 @@ const TrainingMenu = ({ sessionId, sessionData, onRefreshData, onRunPipeline, is
   // Update pipeline selection and send to backend
   const handlePipelineChange = async (e) => {
     const { name, checked } = e.target;
-    const updatedSelection = {
-      ...pipelineSelection,
-      [name]: checked,
-    };
 
     // Persist this change to the backend
     try {

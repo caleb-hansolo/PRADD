@@ -8,6 +8,7 @@ import io
 import shutil
 import time
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
