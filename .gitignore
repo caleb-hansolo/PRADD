@@ -4,5 +4,6 @@ pattern/
 uploads/
 uploaded_chunks/
 downloads/
+pipeline_output/
 venv/
 .env

@@ -12,9 +12,6 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-# Removed global constants for thresholds, they will be passed as parameters.
-# PATTERN_DIR, PATTERN_IMAGES, PATTERN_NAMES are also removed as patterns will be loaded dynamically.
-
 def is_mostly_black_or_white(image_cv, black_threshold_val=30, white_threshold_val=225, percentage_threshold=0.60):
     """
     Check if an image is mostly black or white.
@@ -93,16 +90,6 @@ def patternThresholding(test_image_cv, loaded_pattern_images_data, threshold_mat
         test_image_cv (numpy.ndarray): Grayscale image to be matched.
         loaded_pattern_images_data (list): List of tuples (pattern_cv_gray, pattern_name).
         threshold_match_val (int): SIFT match distance threshold (lower is stricter, but it's used differently here).
-                                The original code counts matches with distance < Threshold.
-                                The variable was THRESHOLD_PATTERN_MATCH = 200. This seems high for distance.
-                                Assuming 'good_matches' count is the primary metric rather than distance value itself for thresholding.
-                                Let's rename to sift_good_match_min_count for clarity if original intent was minimum number of matches.
-                                Original code: good_matches = [m for m in matches if m.distance < Threshold]
-                                This threshold is actually for the *distance* of individual matches.
-                                The number of such "good_matches" is then compared.
-                                The name THRESHOLD_PATTERN_MATCH seems to imply a threshold on the *number* of good matches,
-                                but its value (e.g., 200) was used as a distance cutoff.
-                                Let's assume `threshold_match_val` is this distance cutoff.
     Returns:
         str: Name of the best matching pattern or None.
     """
@@ -129,7 +116,7 @@ def patternThresholding(test_image_cv, loaded_pattern_images_data, threshold_mat
 
     bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
     best_match_name = None
-    max_good_matches = 0 # We want the pattern with the most "good" matches
+    max_good_matches = 0 # want the pattern with the most "good" matches
 
     for pattern_img_gray, pattern_name in loaded_pattern_images_data:
         if pattern_img_gray is None:
@@ -160,15 +147,11 @@ def patternThresholding(test_image_cv, loaded_pattern_images_data, threshold_mat
             logger.error(f"Error during SIFT matching for pattern {pattern_name}: {e}")
             continue
             
-    # Decision: what is a "match"? If any pattern has at least X good_matches?
-    # The original `THRESHOLD_PATTERN_MATCH` might have been intended as min number of good matches.
-    # For now, returning the name of pattern with most good matches.
-    # If a minimum number of good matches is required to consider it a "match" at all,
-    # that would be another threshold. Let's assume `max_good_matches > 0` is enough.
-    # The variable `THRESHOLD_PATTERN_MATCH` from the original code, set to 200, was used as `m.distance < Threshold`.
-    # This implies it was a distance threshold.
+    # what's a "match"? is it if any pattern has at least X good_matches?
+    # `THRESHOLD_PATTERN_MATCH` is distance threshold
+    # assume `max_good_matches > 1` is good enough
 
-    return best_match_name if max_good_matches > 0 else "No_Pattern_Match"
+    return best_match_name if max_good_matches > 1 else "No_Pattern_Match"
 
 
 def sort_into_folders(output_base_dir, name_folder, raw_image_cv, raw_image_name, realsense_image_cv, realsense_image_name):
@@ -193,9 +176,9 @@ def create_text_file_with_removed_images(output_base_dir, removed_images_log):
 def create_zip_from_directory(directory_path_str, job_id):
     """Creates a zip file from a directory, named with job_id."""
     dir_path = Path(directory_path_str)
-    # Place zip in a general downloads area, not inside the dir_path itself
+    # place zip in a general downloads area, not inside the dir_path itself
     zip_filename = f"Results_{job_id}.zip"
-    zip_path = Path("downloads") / zip_filename # Ensure 'downloads' dir exists at main.py level
+    zip_path = Path("downloads") / zip_filename 
     
     Path("downloads").mkdir(exist_ok=True)
 

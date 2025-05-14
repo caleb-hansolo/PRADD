@@ -10,18 +10,18 @@ const UploadFrame = ({
   onDelete,   // Callback for delete action
   sessionId,
   fileType,   // 'dataset', 'mirror', 'pattern'
-  // New props for flexibility:
   acceptFileTypes, // e.g., "video/*" or "image/*"
   allowMultipleFiles, // boolean
-
 }) => {
   const fileInputRef = useRef(null);
-  const [uploadProgress, setUploadProgress] = useState(0); // Overall/current file progress
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [currentUploadingFileName, setCurrentUploadingFileName] = useState('');
 
   const handleFileSelect = () => {
-    fileInputRef.current.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   const handleFileChange = async (e) => {
@@ -29,19 +29,22 @@ const UploadFrame = ({
 
     const filesToUpload = Array.from(e.target.files);
     setIsUploading(true);
-    setUploadProgress(0);
+    setUploadProgress(0); // Reset progress for the batch or first file
 
     for (let i = 0; i < filesToUpload.length; i++) {
       const file = filesToUpload[i];
       setCurrentUploadingFileName(file.name);
-      let fileSpecificProgress = 0;
+      // Reset progress for each individual file if you want to show per-file progress clearly
+      // If you have a single progress bar for all, this might jump around.
+      // For now, let's assume the progress bar reflects the currently uploading file.
+      setUploadProgress(0); 
+
 
       try {
-        // Each file (even if multiple are selected) gets its own upload job_id for chunking
         const initResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL}/init-upload`, {
           method: 'POST',
         });
-        if (!initResponse.ok) throw new Error(`Failed to init upload for ${file.name}`);
+        if (!initResponse.ok) throw new Error(`Failed to init upload for ${file.name}. Status: ${initResponse.status}`);
         const initData = await initResponse.json();
         const fileUploadJobId = initData.job_id;
 
@@ -70,44 +73,42 @@ const UploadFrame = ({
           }
           
           const data = await response.json();
-          fileSpecificProgress = Math.round(((chunkIdx + 1) / totalChunks) * 100);
-          setUploadProgress(fileSpecificProgress); // Show progress for the current file chunk
+          const fileSpecificProgress = Math.round(((chunkIdx + 1) / totalChunks) * 100);
+          setUploadProgress(fileSpecificProgress);
 
           if (data.status === 'complete') {
             console.log(`Upload complete for ${file.name}`, data);
-            onUpload && onUpload({ // Parent component handles updating its state with this new file info
+            onUpload && onUpload({
               fileType: data.file_type,
-              filename: data.filename, // Original filename
-              stored_filename: data.stored_filename, // Name on server
-              thumbnail_url: data.thumbnail_url, // Thumbnail for *this* file
-              all_session_thumbnails: data.all_session_thumbnails, // All thumbs for session
+              filename: data.filename,
+              stored_filename: data.stored_filename,
+              thumbnail_url: data.thumbnail_url,
+              all_session_thumbnails: data.all_session_thumbnails,
             });
-            setUploadProgress(100); // Briefly show 100% for this file
+            // No need to setUploadProgress(100) here as it's covered by fileSpecificProgress
           }
         }
       } catch (error) {
         console.error(`Upload failed for ${file.name}:`, error);
-        // Optionally, notify user about the specific file failure
-        setUploadProgress(0); // Reset progress for this file if it fails
-        // Decide if to continue with next files or stop
+        setUploadProgress(0); // Reset progress for this file on error
+        // Consider how to inform the user about the specific file failure.
       }
-    } // End loop over filesToUpload
+    }
 
     setIsUploading(false);
-    setUploadProgress(0);
+    setUploadProgress(0); // Reset progress after all files in the batch are processed
     setCurrentUploadingFileName('');
     if (fileInputRef.current) {
-      fileInputRef.current.value = null; // Reset file input to allow re-selecting same file(s)
+      fileInputRef.current.value = null;
     }
   };
 
   const handleDeleteClick = () => {
     if (window.confirm(`Are you sure you want to delete all ${title}?`)) {
-      onDelete({ fileType }); // Pass fileType to parent delete handler
+      onDelete({ fileType });
     }
   };
 
-  // Determine how to display thumbnails
   let displayThumbnails = [];
   if (thumbnails) {
     if (Array.isArray(thumbnails)) {
@@ -118,22 +119,29 @@ const UploadFrame = ({
   }
 
   return (
-    <div className="upload-frame mb-3"> {/* Added mb-3 for spacing */}
+    <div className="upload-frame mb-3">
       <h5>{title}</h5>
-      <Card className={`${colorClass}-light`}> {/* Using a lighter variant for card bg */}
+      <Card className={`${colorClass}-light`}>
         <Card.Body>
           {displayThumbnails.length > 0 ? (
             <div className="d-flex flex-wrap justify-content-start align-items-center">
               {displayThumbnails.map((thumbUrl, index) => (
-                <div key={index} className="m-1 position-relative" style={{maxWidth: '100px', maxHeight: '100px'}}>
-                  <img
-                    src={`${process.env.REACT_APP_API_BASE_URL}${thumbUrl}`}
-                    alt={`${title} thumbnail ${index + 1}`}
-                    className="img-thumbnail" // Bootstrap class for simple border and padding
-                    style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                  />
-                   {/* Individual delete for pattern images could be added here if needed */}
-                </div>
+                thumbUrl ? ( // check to ensure thumbUrl is not undefined
+                  <div key={index} className="m-1 position-relative" style={{maxWidth: '100px', maxHeight: '100px'}}>
+                    <img
+                      src={`${process.env.REACT_APP_BASE_URL}${thumbUrl}`} 
+                      alt={`${title} thumbnail ${index + 1}`}
+                      className="img-thumbnail"
+                      style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                      onError={(e) => { 
+                        // Handle image load errors, show a placeholder
+                        e.target.onerror = null; // Prevent infinite loop if placeholder also fails
+                        // e.target.src = "/path/to/default/placeholder.png"; 
+                        console.warn(`Failed to load thumbnail: ${process.env.REACT_APP_BASE_URL}${thumbUrl}`);
+                      }}
+                    />
+                  </div>
+                ) : null // Don't render an img tag if thumbUrl is falsy
               ))}
             </div>
           ) : (
@@ -175,7 +183,7 @@ const UploadFrame = ({
                  <Button
                     variant="outline-danger"
                     size="sm"
-                    onClick={handleDeleteClick} // This deletes ALL for this fileType
+                    onClick={handleDeleteClick}
                     disabled={isUploading}
                  >
                     Delete All {title}
