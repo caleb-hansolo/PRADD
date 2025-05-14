@@ -43,11 +43,11 @@
    ```
 11. Create .env file in the `client` directory
 
-   Example client .env file for local deployment:
-   ```env
-   REACT_APP_API_BASE_URL=http://localhost:5000/api
-   REACT_APP_BASE_URL=http://localhost:5000
-   ```
+    Example client .env file for local deployment:
+    ```env
+    REACT_APP_API_BASE_URL=http://localhost:5000/api
+    REACT_APP_BASE_URL=http://localhost:5000
+    ```
 12. Run the React App
    ```shell
    npm start
