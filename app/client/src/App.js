@@ -35,9 +35,7 @@ function App() {
 
   return (
     <Router>
-      <div className="app-container">
-        {/* <h1 className="app-title">Thresholding and Machine Learning App</h1> */}
-        
+      <div className="app-container">        
         <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
           <Tab eventKey="training" title="Training and Testing">
             <TrainingPage sessionId={sessionId} forceRefresh={activeTab === 'training'} />
