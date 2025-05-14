@@ -1,4 +1,4 @@
-# PRDD - Pattern Recognition Application for Depth Data
+# PRADD - Pattern Recognition Application for Depth Data
 
 ## For Deploying Locally (Development and Testing)
 
