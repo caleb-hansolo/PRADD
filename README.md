@@ -38,9 +38,9 @@
    ```
 9. In a separate terminal, navigate to the `app/client/` directory
 10. Install necessary packages with
-   ```shell
-   npm install
-   ```
+    ```shell
+    npm install
+    ```
 11. Create .env file in the `client` directory
 
     Example client .env file for local deployment:
@@ -49,7 +49,7 @@
     REACT_APP_BASE_URL=http://localhost:5000
     ```
 12. Run the React App
-   ```shell
-   npm start
-   ```
+    ```shell
+    npm start
+    ```
      
