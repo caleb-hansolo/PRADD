@@ -79,7 +79,7 @@ This web application is used to clean data of raw and realsense depth imagery to
       
 ### Advanced Settings Page
 
-**Left Side:** Manu
+**Left Side:** Menu
 * Gives you the ability to edit the threshold values and other criteria that the processes in the pipeline use to detect whether the data from your video is valid
 * Five Dropdowns:
     * *Pattern SIFT Distance:* range from 10-500, a lower value here means stricter pattern recognition
