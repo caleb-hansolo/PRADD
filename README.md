@@ -69,7 +69,7 @@ This web application is used to clean data of raw and realsense depth imagery to
     * **Solid Color Detection** uses a black and white pixel threshold to simplify the values of pixels with color values above or below them as black or white, then uses the solid color detection percentage to discard images that have a certain percentage of their pixels at a solid color (determined by the black and white pixel thresholds)
         * ran on Realsense Depth video
 
-![Pipeline Diagram](https://github.com/caleb-hansolo/PRADD/blob/main/Pattern.drawio.png "Pipeline Diagram")
+![Pipeline Diagram](Pattern.drawio.png "Pipeline Diagram")
 
 **Right Side:** Upload Panes
 * *Raw Video Upload Pane*:
