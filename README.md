@@ -62,7 +62,7 @@ This web application is used to clean data of raw and realsense depth imagery to
 
 **Left Side:** Menu
 * Pipeline Processes Dropdown - select which processes of the machine learning pipeline you would like to be applied to your videos/data
-    * **Pattern Thresholding** uses the pattern images you have uploaded in the *Training/Pattern Matching Data pane* to analyze your videos and goes frame-by-frame to see if the realsense video matches the patterns of the images provided
+    * **Pattern Thresholding** uses the pattern images you have uploaded in the *Pattern Matching Data pane* to analyze your videos and goes frame-by-frame to see if the realsense video matches the patterns of the images provided
         * ran on Realsense Depth Video
     * **Model Object Detection** uses the LLM prompt you can edit in the *Advanced Settings* page to analyze each frame to see if it matches the prompt you provide
         * ran on Raw video
@@ -75,7 +75,7 @@ This web application is used to clean data of raw and realsense depth imagery to
 * *Realsense Depth Video Pane:*
     * Please upload your corresponding realsense depth imagery here (MUST be in video form)
     * This MUST be the exact same length as your raw video, or else the pipeline will not function
-* *Training/Pattern Matching Data Pane:*
+* *Pattern Matching Data Pane:*
     * Please upload multiple realsense depth images (PNG, JPG) to train the pattern detection model in the pipeline
 
 
