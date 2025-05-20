@@ -70,11 +70,11 @@ This web application is used to clean data of raw and realsense depth imagery to
         * ran on Realsense Depth video
 
 **Right Side:** Upload Panes
-* *Dataset Upload Pane*:
+* *Raw Video Upload Pane*:
     * Please upload your raw imagery here (MUST be in video form)
-* *Mirror Dataset Upload Pane:*
+* *Realsense Depth Video Pane:*
     * Please upload your corresponding realsense depth imagery here (MUST be in video form)
-    * This MUST be the exact same length as your raw *Dataset* video, or else the pipeline will not function
+    * This MUST be the exact same length as your raw video, or else the pipeline will not function
 * *Training/Pattern Matching Data Pane:*
     * Please upload multiple realsense depth images (PNG, JPG) to train the pattern detection model in the pipeline
 
