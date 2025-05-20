@@ -16,6 +16,8 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from pipeline import process_video_frames
 import time
+import asyncio
+
 
 # load environment variables
 load_dotenv()
@@ -454,15 +456,17 @@ async def run_pipeline_endpoint(pipeline_data: dict, background_tasks: Backgroun
     pipeline_job_id = str(uuid.uuid4())
     pipeline_jobs[pipeline_job_id] = {"status": "queued", "session_id": session_id, "message": "Pipeline job is queued."}
 
-    background_tasks.add_task(
-        run_pipeline_background_task,
-        pipeline_job_id,
-        session_id,
-        raw_path,
-        realsense_path,
-        pattern_paths, # Pass the list of full paths
-        session['thres_params'],
-        session['pipeline_processes']
+    # praying that this corrects pipeline not running in background
+    asyncio.create_task(
+        run_pipeline_background_task(
+            pipeline_job_id,
+            session_id,
+            raw_path,
+            realsense_path,
+            pattern_paths,
+            session['thres_params'],
+            session['pipeline_processes']
+        )
     )
     logger.info(f"Pipeline job {pipeline_job_id} for session {session_id} added to background queue.")
     return {"job_id": pipeline_job_id, "status": "queued", "message": "Pipeline processing initiated in background."}
