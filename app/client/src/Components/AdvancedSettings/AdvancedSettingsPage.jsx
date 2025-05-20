@@ -133,7 +133,7 @@ const AdvancedSettingsPage = ({ sessionId }) => {
             </ExpandableOptionFrame>
 
             {/* Solid Color Detection Percentage */}
-            <ExpandableOptionFrame title="Solid Color Detection %">
+            <ExpandableOptionFrame title="Solid Color Detection Percentage">
               <Form.Group className="slider-container p-2">
                 <Form.Label>Threshold: {solidDetectionPercentage.toFixed(2)}</Form.Label>
                 <Form.Control
@@ -150,10 +150,10 @@ const AdvancedSettingsPage = ({ sessionId }) => {
             {/* Black Threshold for B/W Check */}
             <ExpandableOptionFrame title="Black Pixel Threshold">
               <Form.Group className="slider-container p-2">
-                <Form.Label>Value (0-255): {blackThresholdBW}</Form.Label>
+                <Form.Label>Value (1-100): {blackThresholdBW}</Form.Label>
                 <Form.Control
                   type="range"
-                  min="0"
+                  min="1"
                   max="100" // Practical upper limit for "black"
                   step="1"
                   value={blackThresholdBW}
@@ -165,7 +165,7 @@ const AdvancedSettingsPage = ({ sessionId }) => {
             {/* White Threshold for B/W Check */}
             <ExpandableOptionFrame title="White Pixel Threshold">
               <Form.Group className="slider-container p-2">
-                <Form.Label>Value (0-255): {whiteThresholdBW}</Form.Label>
+                <Form.Label>Value (150-255): {whiteThresholdBW}</Form.Label>
                 <Form.Control
                   type="range"
                   min="150" // Practical lower limit for "white"
@@ -202,7 +202,7 @@ const AdvancedSettingsPage = ({ sessionId }) => {
           <Row className="h-50">
             <Col md={6} className="upload-col">
               <UploadFrame
-                title="Dataset Preview"
+                title="Raw Video Preview"
                 colorClass="dataset-color"
                 thumbnails={thumbnails?.dataset}
                 onUpload={handleUploadComplete}
@@ -216,7 +216,7 @@ const AdvancedSettingsPage = ({ sessionId }) => {
             </Col>
             <Col md={6} className="upload-col">
               <UploadFrame
-                title="Mirror Dataset Preview"
+                title="Realsense Depth Video Preview"
                 colorClass="mirror-color"
                 thumbnails={thumbnails?.mirror}
                 onUpload={handleUploadComplete}

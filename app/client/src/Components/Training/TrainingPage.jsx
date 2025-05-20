@@ -157,7 +157,7 @@ const TrainingPage = ({ sessionId }) => {
           <Row className="h-50">
             <Col md={6} className="upload-col">
               <UploadFrame
-                title="Dataset"
+                title="Raw Video Preview"
                 colorClass="dataset-color"
                 thumbnails={thumbnails?.dataset}
                 onUpload={handleUploadComplete}
@@ -171,7 +171,7 @@ const TrainingPage = ({ sessionId }) => {
 
             <Col md={6} className="upload-col">
               <UploadFrame
-                title="Mirror Dataset"
+                title="Realsense Depth Video Preview"
                 colorClass="mirror-color"
                 thumbnails={thumbnails?.mirror}
                 onUpload={handleUploadComplete}
@@ -189,7 +189,7 @@ const TrainingPage = ({ sessionId }) => {
           <Row className="h-50">
             <Col md={6} className="mx-auto upload-col">
               <UploadFrame
-                title="Training/Pattern Matching Data"
+                title="Pattern Matching Preview"
                 colorClass="pattern-color"
                 thumbnails={thumbnails?.pattern || []}
                 onUpload={handleUploadComplete}

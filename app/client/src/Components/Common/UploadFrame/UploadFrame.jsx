@@ -186,7 +186,7 @@ const UploadFrame = ({
                     onClick={handleDeleteClick}
                     disabled={isUploading}
                  >
-                    Delete All {title}
+                    Delete {title}
                  </Button>
             )}
           </div>
